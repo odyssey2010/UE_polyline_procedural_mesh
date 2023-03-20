@@ -79,10 +79,10 @@ void AMyPolylineActor::BuildPolyline()
 	TArray<int32> Triangles;
 
 	FVector Point, PrevPoint, NextPoint;
-	FVector PrevDir, NextDir, PrevOutDir, NextOutDir; 
-	FVector OutDir, UpDir = FVector::ZAxisVector; // Direction Up, Out
+	FVector PrevDir, NextDir, PrevOutDir, NextOutDir;
+	FVector OutDir, UpDir = FVector::ZAxisVector; // Outward, Upward Direction
 	FVector V0, V1, PrevV0, PrevV1;
-	int32 I0, I1, PrevI0, PrevI1;
+	int32 I0, I1, PrevI0 = 0, PrevI1 = 0;
 
 	const float HalfThickness = Thickness * 0.5f;
 	float OutDirScale = 1.0f;
@@ -95,22 +95,22 @@ void AMyPolylineActor::BuildPolyline()
 		if (i == 0)
 		{
 			PrevDir = (NextPoint - Point).GetSafeNormal();
-			OutDir = PrevDir.Cross(UpDir);
+			OutDir = UpDir.Cross(PrevDir);
 			OutDirScale = 1.0f;
 		}
 		else if (i == NumPoly - 1)
 		{
 			PrevDir = (Point - PrevPoint).GetSafeNormal();
-			OutDir = PrevDir.Cross(UpDir);
+			OutDir = UpDir.Cross(PrevDir);
 			OutDirScale = 1.0f;
 		}
 		else
 		{
 			PrevDir = (Point - PrevPoint).GetSafeNormal();
-			PrevOutDir = PrevDir.Cross(UpDir);
+			PrevOutDir = UpDir.Cross(PrevDir);
 
 			NextDir = (NextPoint - Point).GetSafeNormal();
-			NextOutDir = NextDir.Cross(UpDir);
+			NextOutDir = UpDir.Cross(NextDir);
 
 			OutDir = (PrevOutDir + NextOutDir).GetSafeNormal();	// Average normal
 
@@ -129,13 +129,13 @@ void AMyPolylineActor::BuildPolyline()
 
 		Colors.Add(Color);
 		Colors.Add(Color);
-		
+
 		if (i > 0)	// Add rectangle of a edge segment
 		{
-			Triangles.Append({ I0, PrevI0, I1 });
-			Triangles.Append({ PrevI0, PrevI1, I1 });
+			Triangles.Append({ I0, I1, PrevI0 });
+			Triangles.Append({ PrevI1, PrevI0, I1 });
 		}
-	
+
 		PrevV0 = V0;
 		PrevV1 = V1;
 
